@@ -1,16 +1,40 @@
 import { useNavigation } from "@react-navigation/native";
+import { useEffect } from "react";
 import {
+  Button,
   Pressable,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
 } from "react-native";
-import { View, Text } from "../components/Themed";
+import { useDispatch, useSelector } from "react-redux";
+import { loadCharacters, resetCharacters } from "../app/reducer-character";
+import { Text, View } from "../components/Themed";
 
-import { listCharacters } from "../services/character/CharacterListService";
+export default function CharacterList() {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   setAppState({
+  //     ...AppState,
+  //     characters: listCharacters({ localstorage: true }, false),
+  //   });
+  // }, []);
+
+  return (
+    <ScrollView style={styles.scroll}>
+      <View style={styles.listContainer}>
+        <Characters navigation={navigation} />
+      </View>
+      <Button onPress={() => dispatch(resetCharacters())} title="RESET" />
+    </ScrollView>
+  );
+}
 
 function CharacterBox({ character, navigation }) {
-  const { name, level, cClass, subclass, creationDate, updateDate } = character;
+  const { name, level, className, subClassName, creationDate, updateDate } =
+    character;
 
   return (
     <TouchableHighlight
@@ -22,8 +46,8 @@ function CharacterBox({ character, navigation }) {
       <View style={styles.listItens}>
         <Text style={styles.text}>{name}</Text>
         <Text style={styles.text}>{level}</Text>
-        <Text style={styles.text}>{cClass}</Text>
-        <Text style={styles.text}>{subclass}</Text>
+        <Text style={styles.text}>{className}</Text>
+        <Text style={styles.text}>{subClassName}</Text>
         <Text style={styles.text}>{creationDate}</Text>
         <Text style={styles.text}>{updateDate}</Text>
       </View>
@@ -31,18 +55,14 @@ function CharacterBox({ character, navigation }) {
   );
 }
 
-export default function CharacterList() {
-  const navigation = useNavigation();
+function Characters({ navigation }) {
+  console.log("loadCharacters init");
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(loadCharacters());
+  }, []);
 
-  return (
-    <ScrollView style={styles.scroll}>
-      <View style={styles.listContainer}>{loadCharacters(navigation)}</View>
-    </ScrollView>
-  );
-}
-
-function loadCharacters(navigation) {
-  const characters = listCharacters(null, true);
+  const characters = useSelector((state) => state.character.characters);
 
   if (characters) {
     return characters.map((character, i) => {
@@ -51,8 +71,6 @@ function loadCharacters(navigation) {
       );
     });
   } else {
-    // return <Text>Click here to create a new Character.</Text>;
-
     return (
       <Pressable
         style={styles.noCharacters}
@@ -91,12 +109,10 @@ const styles = StyleSheet.create({
     borderRadius: "6px",
   },
   text: {
-    color: "white",
     padding: 10,
     marginRight: 5,
   },
   noCharacters: {
-    color: "white",
     padding: 10,
     fontSize: 20,
   },

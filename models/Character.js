@@ -1,4 +1,5 @@
 export default function Character(
+  characterId = "",
   name = "",
   level = 0,
   className = "",
@@ -7,6 +8,7 @@ export default function Character(
   updateDate = ""
 ) {
   return {
+    characterId,
     name,
     level,
     className,
